@@ -1,0 +1,42 @@
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=ttyd
+pkgver=1.6.1
+pkgrel=1
+pkgdesc="Share your terminal over the web"
+url="https://tsl0922.github.io/ttyd"
+arch="all"
+license="MIT"
+# Note: vim is needed for tool xxd.
+# makedepends="cmake json-c-dev bsd-compat-headers openssl-dev libwebsockets-dev
+# 	vim zlib-dev libuv-dev"
+makedepends="cmake json-c-dev bsd-compat-headers openssl-dev
+	vim zlib-dev libuv-dev"
+
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/tsl0922/ttyd/archive/$pkgver.tar.gz
+	fix-cmake.patch
+	"
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -B build \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_VERBOSE_MAKEFILE=TRUE \
+		$CMAKE_CROSSOPTS .
+	make -C build
+}
+
+check() {
+	./build/ttyd --version
+}
+
+package() {
+	make -C build DESTDIR="$pkgdir" install
+}
+
+sha512sums="42fbff479e05dbaab94c8c83180f4ec98b8efe0af2f853e5c9317a84a5a2d46b7fc53308dccfeeea92793f05183a29e29428d2ba62a2a954c1b04335863082b0  ttyd-1.6.1.tar.gz
+9846ed543377982847a366b11b74aa5a5647903f9bfb30794af9cefbad019472e5f0735fce5eee662fe09c1a4a4a71a4bdce03cb87f8281f8f0a3010e753cd34  fix-cmake.patch"
